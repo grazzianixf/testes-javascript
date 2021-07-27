@@ -1,0 +1,204 @@
+<html>
+
+<body>
+    <div id="divLoading"></div>
+    <div id="divMessage"></div>
+
+    <hr>
+
+    <table>
+        <thead id="tabela">
+            <th>
+                ID
+            </th>
+            <th>
+                Nome
+            </th>
+            <th>
+                Ação
+            </th>            
+        </thead>
+        <tbody id="tabelaBody" >
+
+        </tbody>
+    </table>
+
+    <br>
+
+    <button onclick="atualizarTabela()">Atualizar</button>
+    <button onclick="novoRegistro()">Novo</button>
+
+    <hr>
+
+    <div id="divForm" >
+        <table>
+            <tr>
+                <td>ID: </td>
+                <td>
+                    <input type="text" disabled name="id" id="inputId">
+                </td>
+            </tr>            
+            <tr>
+                <td>Nome: </td>
+                <td>
+                    <input type="text" name="nome" id="inputNome">
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button onclick="inserir()" id="buttonInserir">Inserir</button>
+                    <button onclick="salvar()" id="buttonSalvar">Salvar</button>
+                    <button onclick="cancelar()" id="buttonCancelar">Cancelar</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+<script>
+    // let url = "http://localhost:3000"
+    let url = "https://the-json-server.herokuapp.com"
+
+    let tabela = document.getElementById("tabela")
+    let tabelaBody = document.getElementById("tabelaBody")
+    let divLoading = document.getElementById("divLoading")
+    let divMessage = document.getElementById("divMessage")
+    let divForm = document.getElementById("divForm")
+    let inputId = document.getElementById("inputId")
+    let inputNome = document.getElementById("inputNome")
+    let buttonInserir = document.getElementById("buttonInserir")
+    let buttonSalvar = document.getElementById("buttonSalvar")
+    let buttonCancelar = document.getElementById("buttonCancelar")
+
+    let itemParaAlteracao = {}
+    
+
+    atualizarTabela = () => {
+        exibirLoading()
+        tabelaBody.innerHTML = ""
+        fetch(`${url}/alimentos`)
+            .then( response => response.json())
+            .then( lista => lista.map( item => criarLinha(item) ) ) 
+            .finally( () => ocultarLoading() )
+    }
+
+    exibirLoading = () => {
+        divLoading.innerHTML = "Loading..."
+    }
+
+    ocultarLoading = () => {
+        divLoading.innerHTML = ""
+    }
+
+    exibirMessage = (msg) => {
+        divMessage.style.visibility = 'visible'
+        divMessage.innerHTML = `${msg} <a href="javascript: ocultarMessage()">X</a>`
+    }
+
+    ocultarMessage = () => {
+        divMessage.style.visibility = 'hidden'
+    }
+
+    criarLinha = (item) => {
+        let linha = document.createElement("tr")
+        let coluna1 = document.createElement("td")
+        let coluna2 = document.createElement("td")
+        let coluna3 = document.createElement("td")
+
+        coluna1.innerText = item.id
+        coluna2.innerText = item.nome
+        coluna3.innerHTML = `<a href="javascript: excluir(${item.id})">Excluir</a> | <a href="javascript: alterarRegistro(${item.id})">Alterar</a>`
+
+        linha.appendChild(coluna1)
+        linha.appendChild(coluna2)
+        linha.appendChild(coluna3)
+
+        tabelaBody.appendChild(linha)
+
+        // console.log(item.id, item.nome)
+    }
+
+    excluir = (id) => {
+        exibirLoading()
+        fetch(`${url}/alimentos/${id}`, { method: 'DELETE' })
+            .then(response => { exibirMessage("Item excluido!"); atualizarTabela()} )
+    }
+
+    ocultarForm = () => {
+        divForm.style.visibility = 'hidden'
+
+        buttonInserir.style.visibility = 'hidden'
+        buttonSalvar.style.visibility = 'hidden'        
+    }
+
+    exibirForm = () => {
+        divForm.style.visibility = 'visible'
+    }    
+
+    novoRegistro = () => {
+        exibirForm()
+
+        inputId.value = ""
+        inputNome.value = ""
+
+        buttonInserir.style.visibility = 'visible'
+        buttonSalvar.style.visibility = 'hidden'
+    }
+
+    alterarRegistro = (id) => {
+        exibirLoading()
+
+        fetch(`${url}/alimentos/${id}`)
+            .then( response => response.json() )
+            .then( item => exibirFormParaAlteracao(item))
+            .finally( () => ocultarLoading() )
+    }
+
+    exibirFormParaAlteracao = (item) => {
+        exibirForm()
+
+        inputId.value = item.id
+        inputNome.value = item.nome
+
+        buttonInserir.style.visibility = 'hidden'
+        buttonSalvar.style.visibility = 'visible'        
+    }
+
+    inserir = () => {
+        exibirLoading()
+
+        let data = { nome : inputNome.value }
+
+        fetch(`${url}/alimentos`, {
+            method: 'POST',
+            headers: { "Content-Type" : "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(response => {exibirMessage("Registro inserido!"); ocultarForm()})
+        .finally( () => atualizarTabela() )
+    }
+
+    salvar = () => {
+        exibirLoading()
+
+        let data = { nome : inputNome.value }
+
+        fetch(`${url}/alimentos/${inputId.value}`, {
+            method: 'PUT',
+            headers: { "Content-Type" : "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(response => {exibirMessage("Registro alterado!"); ocultarForm()})
+        .finally( () => atualizarTabela() )
+    }    
+
+    cancelar = () => {
+        ocultarForm()
+    }
+
+    ocultarMessage();
+    ocultarForm();
+</script>
+
+</html>
