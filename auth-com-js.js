@@ -1,34 +1,66 @@
 let htmlMain = `
-<table width="100%" border="1">
-    <tr>
-        <td colspan="2" id="headerContainer" align="right">HEADER</td>
-    </tr>
-    <tr>
-        <td valign="top" align="center" id="menuContainer"></td>
-        <td id="mainContainer"></td>
-    </tr>
-</table>
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<body>
+
+<div id="divMenu">
+
+</div>
+
+<header class=" w3-display-container w3-top w3-bar w3-theme">
+  <button id="buttonOpenMenu" class="w3-bar-item w3-button w3-xxxlarge w3-hover-theme" onclick="w3_open()">&#9776;</button>
+  <h1 class="w3-bar-item">My APP</h1>
+  <div class="w3-container w3-display-right" id="headerContainer"></div>
+</header>
+
+<div class="w3-container" id="mainContainer" style="margin-top:90px">
+</div>
+
+</body>
+</html> 
 `
 //<script src="auth-com-js.js"><\/script>
 
 let htmlHeaderLogout = `
 <div>
-    User: nome <button onclick="logout()">Logout</button>
+    <button class="w3-btn w3-xlarge" onclick="logout()">&#9940;</button>
 </div>
 `
 
-let htmlHeaderLogin = `
-<div>
-    User: <input type="text" name="user" id="inputUser"> 
-    Password : <input type="text" name="password" id="inputPassword"> 
-    <button onclick="login()">Login</button>
+let htmlEnterLogin = `
+
+<div class="w3-card-4">
+  <div class="w3-container w3-indigo w3-center">
+    <h3>Login</h3>
+  </div>
+  <div class="w3-container">
+    <p>      
+    <label class="w3-text-indigo"><b>Username</b></label>
+    <input class="w3-input w3-border w3-sand" name="user" id="inputUser" type="text"></p>
+    <p>      
+    <label class="w3-text-indigo"><b>Password</b></label>
+    <input class="w3-input w3-border w3-sand" name="password" id="inputPassword" type="password"></p>
+    <p>
+        <div class="w3-center">
+            <button class="w3-btn w3-indigo w3-center" onclick="login()">Login</button>
+        </div>
+    </p>
+  </div>
 </div>
 `
 
-let htmlNotAllowed = `
-<div align="center">
-    <p>Not Allowed. Please, proceed to Login!!!</p>
+let htmlMenu = `
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block" style="display:none;z-index:5" id="menu">
+<button class="w3-bar-item w3-button w3-xxlarge" onclick="w3_close()">Close &times;</button>
+<a href="#" class="w3-bar-item w3-button">Link 1</a>
+<a href="#" class="w3-bar-item w3-button">Link 2</a>
+<a href="#" class="w3-bar-item w3-button">Link 3</a>
 </div>
+<div class="w3-overlay" onclick="w3_close()" style="cursor:pointer" id="overlay"></div>
 `
 
 loadMain = () => {
@@ -40,11 +72,15 @@ loadMain = () => {
 
     let mainContainer = document.getElementById("mainContainer")
 
+    let buttonOpenMenu = document.getElementById("buttonOpenMenu")
+
     if (isAuthenticated()) {
         loadMenu()
         mainContainer.appendChild(container)
+        buttonOpenMenu.disabled = false
     } else {
-        mainContainer.innerHTML = htmlNotAllowed
+        mainContainer.innerHTML = htmlEnterLogin
+        buttonOpenMenu.disabled = true
     }
 }
 
@@ -53,18 +89,15 @@ loadHeader = () => {
 
     if (isAuthenticated()) {
         html = htmlHeaderLogout
-    } else {
-        html = htmlHeaderLogin
-    }
+    } 
 
     let headerContainer = document.getElementById("headerContainer")
     headerContainer.innerHTML = html
 }
 
 loadMenu = () => {
-    let menuContainer = document.getElementById("menuContainer")
-    menuContainer.setAttribute("width", "20%")
-    menuContainer.innerHTML = "MENU"
+    let divMenu = document.getElementById("divMenu")
+    divMenu.innerHTML = htmlMenu
 }
 
 login = () => {
@@ -85,6 +118,16 @@ logout = () => {
 isAuthenticated = () => {
     return (localStorage.getItem("token") && localStorage.getItem("token") !== 'undefined')
 }
+
+function w3_open() {
+    document.getElementById("menu").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+  }
+  
+  function w3_close() {
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  }
 
 loadMain()
 loadHeader()
